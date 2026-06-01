@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Exec(go version)",
+      "Exec(go mod)",
+      "Exec(./worktree)",
+      "Exec(go build)",
+      "Exec(ls)",
+      "Exec(go install)",
+      "Exec(go vet)",
+      "Exec(go get)",
+      "Exec(worktree)",
+      "Exec(mkdir)",
+      "Exec(rm)",
+      "Exec(git config)",
+      "Exec(go test)",
+      "Exec(grep)",
+      "Exec(sed)"
+    ]
+  }
+}
