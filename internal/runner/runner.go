@@ -118,7 +118,7 @@ func Create(opts CreateOptions) error {
 
 	// 1. pre_create steps run in the source repo (e.g. git pull).
 	for _, raw := range cfg.PreCreate {
-		step := strategy.RunStep{Command: os.Expand(raw, expand), Dir: "source"}
+		step := strategy.RunStep{Command: raw, Dir: "source"}
 		fmt.Printf("==> %s\n", step.Describe())
 		if err := step.Execute(ctx); err != nil {
 			return err
@@ -153,7 +153,7 @@ func Create(opts CreateOptions) error {
 
 	// 4. post_create steps run inside the worktree.
 	for _, raw := range cfg.PostCreate {
-		step := strategy.RunStep{Command: os.Expand(raw, expand), Dir: "target"}
+		step := strategy.RunStep{Command: raw, Dir: "target"}
 		fmt.Printf("==> %s\n", step.Describe())
 		if err := step.Execute(ctx); err != nil {
 			return err
@@ -195,10 +195,9 @@ func Remove(opts RemoveOptions) error {
 		"SOURCE": source,
 	}
 	ctx := strategy.ExecContext{SourceDir: source, TargetDir: target, Params: params}
-	expand := expander(params)
 
 	for _, raw := range cfg.PreRemove {
-		step := strategy.RunStep{Command: os.Expand(raw, expand), Dir: "target"}
+		step := strategy.RunStep{Command: raw, Dir: "target"}
 		fmt.Printf("==> %s\n", step.Describe())
 		if err := step.Execute(ctx); err != nil {
 			// Non-fatal: containers/resources may already be gone.
