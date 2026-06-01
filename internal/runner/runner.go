@@ -43,12 +43,16 @@ const defaultWorktreeBase = "~/project/worktree"
 // expandPath expands a leading "~" and ${ENV_VAR} references in a path.
 func expandPath(p string) (string, error) {
 	p = os.ExpandEnv(p)
-	if strings.HasPrefix(p, "~") {
+	if p == "~" || strings.HasPrefix(p, "~/") {
 		home, err := os.UserHomeDir()
 		if err != nil {
 			return "", fmt.Errorf("resolve home directory: %w", err)
 		}
-		p = filepath.Join(home, strings.TrimPrefix(p, "~"))
+		if p == "~" {
+			p = home
+		} else {
+			p = filepath.Join(home, p[2:])
+		}
 	}
 	return p, nil
 }
