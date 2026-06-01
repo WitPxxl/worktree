@@ -90,7 +90,9 @@ worktree rm --branch feature/foo --force   # also discard local changes
 1. Loads `.worktree.yaml` from the current directory.
 2. Resolves params (defaults from config, overridden by `-p KEY=VAL`).
 3. Runs `pre_create` commands in the source repo.
-4. `git worktree add -b <branch> <target>` (creates the branch from `HEAD`).
+4. Creates the worktree:
+   - If the branch already exists locally → `git worktree add <target> <branch>` (checks it out as-is).
+   - Otherwise → `git worktree add -b <branch> <target>` (creates it from the current `HEAD`).
 5. Copies files declared in `copy` into the worktree.
 6. Runs `post_create` commands inside the worktree.
 
