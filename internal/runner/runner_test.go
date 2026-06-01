@@ -2,8 +2,57 @@ package runner
 
 import (
 	"os"
+	"os/exec"
 	"testing"
 )
+
+// initGitRepo creates a bare-minimum repo with one commit on `main` so that
+// HEAD exists. Skips the test if git isn't installed.
+func initGitRepo(t *testing.T) string {
+	t.Helper()
+	if _, err := exec.LookPath("git"); err != nil {
+		t.Skip("git not available")
+	}
+	dir := t.TempDir()
+	run := func(args ...string) {
+		c := exec.Command("git", args...)
+		c.Dir = dir
+		c.Env = append(os.Environ(),
+			"GIT_AUTHOR_NAME=test", "GIT_AUTHOR_EMAIL=test@example.com",
+			"GIT_COMMITTER_NAME=test", "GIT_COMMITTER_EMAIL=test@example.com",
+		)
+		if out, err := c.CombinedOutput(); err != nil {
+			t.Fatalf("git %v: %v\n%s", args, err, out)
+		}
+	}
+	run("init", "-b", "main")
+	if err := os.WriteFile(dir+"/README", []byte("hi"), 0o644); err != nil {
+		t.Fatalf("write: %v", err)
+	}
+	run("add", ".")
+	run("commit", "-m", "init")
+	return dir
+}
+
+func TestLocalBranchExists(t *testing.T) {
+	dir := initGitRepo(t)
+
+	if !localBranchExists(dir, "main") {
+		t.Error("expected main to exist")
+	}
+	if localBranchExists(dir, "feature/new") {
+		t.Error("did not expect feature/new to exist yet")
+	}
+
+	c := exec.Command("git", "branch", "feature/new")
+	c.Dir = dir
+	if out, err := c.CombinedOutput(); err != nil {
+		t.Fatalf("create branch: %v\n%s", err, out)
+	}
+	if !localBranchExists(dir, "feature/new") {
+		t.Error("expected feature/new to exist after creation")
+	}
+}
 
 func TestWorktreeDirName(t *testing.T) {
 	cases := map[string]string{

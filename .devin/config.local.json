@@ -15,7 +15,8 @@
       "Exec(git config)",
       "Exec(go test)",
       "Exec(grep)",
-      "Exec(sed)"
+      "Exec(sed)",
+      "Exec(command)"
     ]
   }
 }

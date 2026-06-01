@@ -3,6 +3,7 @@ package runner
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -10,6 +11,14 @@ import (
 	"github.com/WitPxxl/worktree/internal/shell"
 	"github.com/WitPxxl/worktree/internal/strategy"
 )
+
+// localBranchExists reports whether a local branch with the given name exists
+// in the repo at dir. Output is suppressed; only the exit code matters.
+func localBranchExists(dir, branch string) bool {
+	c := exec.Command("git", "show-ref", "--verify", "--quiet", "refs/heads/"+branch)
+	c.Dir = dir
+	return c.Run() == nil
+}
 
 // CreateOptions / RemoveOptions are the user-facing inputs for the two flows.
 type CreateOptions struct {
@@ -93,12 +102,20 @@ func Create(opts CreateOptions) error {
 		}
 	}
 
-	// 2. Create the worktree + branch from current HEAD.
+	// 2. Create the worktree. If the branch already exists locally, check it
+	// out as-is; otherwise create it from the current HEAD.
 	if err := os.MkdirAll(filepath.Dir(target), 0o755); err != nil {
 		return fmt.Errorf("create parent directory: %w", err)
 	}
-	fmt.Printf("==> git worktree add -b %s %s\n", opts.Branch, target)
-	if err := shell.Run(source, "git", "worktree", "add", "-b", opts.Branch, target); err != nil {
+	var gitArgs []string
+	if localBranchExists(source, opts.Branch) {
+		fmt.Printf("==> branch %q already exists, checking it out into %s\n", opts.Branch, target)
+		gitArgs = []string{"worktree", "add", target, opts.Branch}
+	} else {
+		fmt.Printf("==> creating branch %q from HEAD and worktree at %s\n", opts.Branch, target)
+		gitArgs = []string{"worktree", "add", "-b", opts.Branch, target}
+	}
+	if err := shell.Run(source, "git", gitArgs...); err != nil {
 		return err
 	}
 
