@@ -9,8 +9,6 @@ sessions, each on its own branch, with the per-project `composer install` /
 
 ## Install
 
-> Replace `WitPxxl` with your GitHub username once the repo is published.
-
 ```sh
 go install github.com/WitPxxl/worktree@latest
 ```
