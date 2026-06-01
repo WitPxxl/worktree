@@ -21,6 +21,10 @@ type Param struct {
 
 // Config is the deserialized representation of .worktree.yaml.
 type Config struct {
+	// WorktreeDir is the base directory under which new worktrees are created.
+	// Supports leading "~" and ${ENV_VAR} expansion. Defaults to
+	// "~/project/worktree" when empty.
+	WorktreeDir string           `yaml:"worktree_dir"`
 	Params      map[string]Param `yaml:"params"`
 	Copy        []string         `yaml:"copy"`
 	PreCreate   []string         `yaml:"pre_create"`

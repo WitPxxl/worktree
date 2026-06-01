@@ -54,6 +54,48 @@ func TestLocalBranchExists(t *testing.T) {
 	}
 }
 
+func TestResolveTarget_DefaultBase(t *testing.T) {
+	t.Setenv("HOME", "/tmp/fake-home")
+	got, err := resolveTarget("", "feature/foo")
+	if err != nil {
+		t.Fatalf("resolveTarget: %v", err)
+	}
+	want := "/tmp/fake-home/project/worktree/feature_foo"
+	if got != want {
+		t.Errorf("got %q, want %q", got, want)
+	}
+}
+
+func TestResolveTarget_ExpandsTildeAndEnv(t *testing.T) {
+	t.Setenv("HOME", "/tmp/fake-home")
+	t.Setenv("WORKTREE_TEST_BASE", "/srv/worktrees")
+	got, err := resolveTarget("${WORKTREE_TEST_BASE}/team", "main")
+	if err != nil {
+		t.Fatalf("resolveTarget: %v", err)
+	}
+	if got != "/srv/worktrees/team/main" {
+		t.Errorf("got %q", got)
+	}
+
+	got, err = resolveTarget("~/wt", "main")
+	if err != nil {
+		t.Fatalf("resolveTarget: %v", err)
+	}
+	if got != "/tmp/fake-home/wt/main" {
+		t.Errorf("got %q", got)
+	}
+}
+
+func TestResolveTarget_AbsolutePath(t *testing.T) {
+	got, err := resolveTarget("/var/wt", "feature/x")
+	if err != nil {
+		t.Fatalf("resolveTarget: %v", err)
+	}
+	if got != "/var/wt/feature_x" {
+		t.Errorf("got %q", got)
+	}
+}
+
 func TestWorktreeDirName(t *testing.T) {
 	cases := map[string]string{
 		"main":              "main",

@@ -37,17 +37,33 @@ func worktreeDirName(branch string) string {
 	return strings.ReplaceAll(branch, "/", "_")
 }
 
-func resolveDirs(branch string) (source, target string, err error) {
-	source, err = os.Getwd()
-	if err != nil {
-		return "", "", fmt.Errorf("get current directory: %w", err)
+// defaultWorktreeBase is used when the config doesn't declare worktree_dir.
+const defaultWorktreeBase = "~/project/worktree"
+
+// expandPath expands a leading "~" and ${ENV_VAR} references in a path.
+func expandPath(p string) (string, error) {
+	p = os.ExpandEnv(p)
+	if strings.HasPrefix(p, "~") {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			return "", fmt.Errorf("resolve home directory: %w", err)
+		}
+		p = filepath.Join(home, strings.TrimPrefix(p, "~"))
 	}
-	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", "", fmt.Errorf("resolve home directory: %w", err)
+	return p, nil
+}
+
+// resolveTarget computes the absolute worktree path for a branch given the
+// (optional) base directory declared in the config.
+func resolveTarget(base, branch string) (string, error) {
+	if base == "" {
+		base = defaultWorktreeBase
 	}
-	target = filepath.Join(home, "project", "worktree", worktreeDirName(branch))
-	return source, target, nil
+	base, err := expandPath(base)
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(base, worktreeDirName(branch)), nil
 }
 
 // expander returns an os.Expand mapper for the given params.
@@ -66,12 +82,15 @@ func Create(opts CreateOptions) error {
 	if opts.Branch == "" {
 		return fmt.Errorf("branch is required")
 	}
-	source, target, err := resolveDirs(opts.Branch)
+	source, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("get current directory: %w", err)
+	}
+	cfg, err := config.Load(source)
 	if err != nil {
 		return err
 	}
-
-	cfg, err := config.Load(source)
+	target, err := resolveTarget(cfg.WorktreeDir, opts.Branch)
 	if err != nil {
 		return err
 	}
@@ -146,11 +165,15 @@ func Remove(opts RemoveOptions) error {
 	if opts.Branch == "" {
 		return fmt.Errorf("branch is required")
 	}
-	source, target, err := resolveDirs(opts.Branch)
+	source, err := os.Getwd()
+	if err != nil {
+		return fmt.Errorf("get current directory: %w", err)
+	}
+	cfg, err := config.Load(source)
 	if err != nil {
 		return err
 	}
-	cfg, err := config.Load(source)
+	target, err := resolveTarget(cfg.WorktreeDir, opts.Branch)
 	if err != nil {
 		return err
 	}

@@ -21,6 +21,10 @@ Drop a `.worktree.yaml` at the root of any repo you want to manage. Example
 for a PHP + Node project bootstrapped through Docker Compose:
 
 ```yaml
+# Base directory where worktrees are created. Supports `~` and ${ENV_VAR}.
+# Optional; defaults to ~/project/worktree.
+worktree_dir: ~/project/worktree
+
 params:
   TOKEN:
     description: "GitHub token forwarded to docker build"
@@ -44,20 +48,21 @@ pre_remove:
 
 ### Sections
 
-| Section       | Where it runs | What it's for                                                  |
-| ------------- | ------------- | -------------------------------------------------------------- |
-| `params`      | n/a           | Declared inputs. `required: true` and/or `default:` supported. |
-| `copy`        | n/a           | Files copied from source repo into the new worktree.           |
-| `pre_create`  | source repo   | Commands run **before** `git worktree add` (e.g. `git pull`).  |
-| `post_create` | new worktree  | Commands run **after** the worktree is created.                |
-| `pre_remove`  | worktree      | Commands run before `git worktree remove` (failures warn-only).|
+| Section        | Where it runs | What it's for                                                                                          |
+| -------------- | ------------- | ------------------------------------------------------------------------------------------------------ |
+| `worktree_dir` | n/a           | Base directory for new worktrees. Optional; defaults to `~/project/worktree`. Supports `~` / `${ENV}`. |
+| `params`       | n/a           | Declared inputs. `required: true` and/or `default:` supported.                                         |
+| `copy`         | n/a           | Files copied from source repo into the new worktree.                                                   |
+| `pre_create`   | source repo   | Commands run **before** `git worktree add` (e.g. `git pull`).                                          |
+| `post_create`  | new worktree  | Commands run **after** the worktree is created.                                                        |
+| `pre_remove`   | worktree      | Commands run before `git worktree remove` (failures warn-only).                                        |
 
 ### Variables
 
 Inside any string in the config you can reference:
 
 - `${BRANCH}` – the branch name passed to `--branch`
-- `${TARGET}` – the absolute worktree path (`~/project/worktree/<branch>`)
+- `${TARGET}` – the absolute worktree path (`<worktree_dir>/<branch>`)
 - `${SOURCE}` – the absolute source repo path
 - Any user-declared param (e.g. `${TOKEN}`)
 - Any environment variable (fallback if no param of that name exists)
