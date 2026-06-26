@@ -14,7 +14,7 @@ func Run(dir string, env map[string]string, name string, args ...string) error {
 	if dir != "" {
 		c.Dir = dir
 	}
-	if env != nil {
+	if len(env) > 0 {
 		c.Env = os.Environ()
 		for k, v := range env {
 			c.Env = append(c.Env, fmt.Sprintf("%s=%s", k, v))
