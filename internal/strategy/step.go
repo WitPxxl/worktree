@@ -38,7 +38,11 @@ func (s RunStep) Execute(ctx ExecContext) error {
 	if s.Dir == "source" {
 		workdir = ctx.SourceDir
 	}
-	return shell.Run(workdir, ctx.Params, "sh", "-c", s.Command)
+	env := os.Environ()
+	for k, v := range ctx.Params {
+		env = append(env, fmt.Sprintf("%s=%s", k, v))
+	}
+	return shell.Run(workdir, env, "sh", "-c", s.Command)
 }
 
 // CopyStep copies a single file from source repo to the new worktree,
