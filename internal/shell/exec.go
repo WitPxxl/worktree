@@ -6,7 +6,7 @@ import (
 	"os/exec"
 )
 
-// Run executes a command, streaming stdout/stderr to the user's terminal.
+// RunEnv executes a command with the provided environment, streaming stdout/stderr.
 // If dir is non-empty the command runs in that working directory.
 // If env is non-nil, those variables are appended to the process environment.
 func Run(dir string, env map[string]string, name string, args ...string) error {
@@ -27,4 +27,10 @@ func Run(dir string, env map[string]string, name string, args ...string) error {
 		return fmt.Errorf("%s %v: %w", name, args, err)
 	}
 	return nil
+}
+
+// Run executes a command, streaming stdout/stderr to the user's terminal.
+// If dir is non-empty the command runs in that working directory.
+func Run(dir, name string, args ...string) error {
+	return RunEnv(dir, nil, name, args...)
 }
