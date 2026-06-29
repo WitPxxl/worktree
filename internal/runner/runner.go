@@ -138,7 +138,7 @@ func Create(opts CreateOptions) error {
 		fmt.Printf("==> creating branch %q from HEAD and worktree at %s\n", opts.Branch, target)
 		gitArgs = []string{"worktree", "add", "-b", opts.Branch, target}
 	}
-	if err := shell.Run(source, nil, "git", gitArgs...); err != nil {
+	if err := shell.RunEnv(source, nil, "git", gitArgs...); err != nil {
 		return err
 	}
 
@@ -211,7 +211,7 @@ func Remove(opts RemoveOptions) error {
 	}
 	args = append(args, target)
 	fmt.Printf("==> git %s\n", strings.Join(args, " "))
-	if err := shell.Run(source, nil, "git", args...); err != nil {
+	if err := shell.RunEnv(source, nil, "git", args...); err != nil {
 		return err
 	}
 
