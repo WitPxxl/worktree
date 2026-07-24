@@ -9,7 +9,7 @@ import (
 // RunEnv executes a command with the provided environment, streaming stdout/stderr.
 // If dir is non-empty the command runs in that working directory.
 // If env is non-nil, those variables are appended to the process environment.
-func Run(dir string, env map[string]string, name string, args ...string) error {
+func RunEnv(dir string, env map[string]string, name string, args ...string) error {
 	c := exec.Command(name, args...)
 	if dir != "" {
 		c.Dir = dir
