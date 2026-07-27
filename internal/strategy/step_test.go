@@ -66,6 +66,15 @@ func TestCopyStep_MissingSource(t *testing.T) {
 	}
 }
 
+func TestCopyStep_PathTraversal(t *testing.T) {
+	src := t.TempDir()
+	dst := t.TempDir()
+	step := CopyStep{RelPath: "../escape.txt"}
+	if err := step.Execute(ExecContext{SourceDir: src, TargetDir: dst}); err == nil {
+		t.Fatal("expected error for path traversal attempt, got nil")
+	}
+}
+
 func TestRunStep_Describe(t *testing.T) {
 	s := RunStep{Command: "echo hi", Dir: "target"}
 	if got := s.Describe(); got != "[target] $ echo hi" {
