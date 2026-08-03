@@ -86,6 +86,9 @@ func Create(opts CreateOptions) error {
 	if opts.Branch == "" {
 		return fmt.Errorf("branch is required")
 	}
+	if !filepath.IsLocal(opts.Branch) {
+		return fmt.Errorf("invalid branch %q: must be a local relative path", opts.Branch)
+	}
 	source, err := os.Getwd()
 	if err != nil {
 		return fmt.Errorf("get current directory: %w", err)
@@ -168,6 +171,9 @@ func Create(opts CreateOptions) error {
 func Remove(opts RemoveOptions) error {
 	if opts.Branch == "" {
 		return fmt.Errorf("branch is required")
+	}
+	if !filepath.IsLocal(opts.Branch) {
+		return fmt.Errorf("invalid branch %q: must be a local relative path", opts.Branch)
 	}
 	source, err := os.Getwd()
 	if err != nil {
