@@ -51,7 +51,7 @@ func (s CopyStep) Describe() string { return fmt.Sprintf("copy %s -> <target>/%s
 
 func (s CopyStep) Execute(ctx ExecContext) error {
 	if !filepath.IsLocal(s.RelPath) {
-		return fmt.Errorf("copy path escapes directory: %s", s.RelPath)
+		return fmt.Errorf("invalid path %q: must be a local relative path", s.RelPath)
 	}
 
 	src := filepath.Join(ctx.SourceDir, s.RelPath)
