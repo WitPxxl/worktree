@@ -67,7 +67,13 @@ func resolveTarget(base, branch string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return filepath.Join(base, worktreeDirName(branch)), nil
+	dirName := worktreeDirName(branch)
+	// Although worktreeDirName replaces "/", the branch name might be ".."
+	// or another reserved name.
+	if !filepath.IsLocal(dirName) || dirName == "" {
+		return "", fmt.Errorf("branch name escapes directory: %s", dirName)
+	}
+	return filepath.Join(base, dirName), nil
 }
 
 // expander returns an os.Expand mapper for the given params.

@@ -96,6 +96,17 @@ func TestResolveTarget_AbsolutePath(t *testing.T) {
 	}
 }
 
+func TestResolveTarget_PathTraversal(t *testing.T) {
+	_, err := resolveTarget("/var/wt", "..")
+	if err == nil {
+		t.Fatal("expected error for path traversal attempt via branch name '..', got nil")
+	}
+
+	// Since worktreeDirName replaces "/" with "_", "../escape" becomes ".._escape"
+	// which IS local (a directory literally named ".._escape").
+	// To test traversal, we just need to ensure branch ".." fails.
+}
+
 func TestWorktreeDirName(t *testing.T) {
 	cases := map[string]string{
 		"main":              "main",

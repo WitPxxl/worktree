@@ -50,6 +50,10 @@ type CopyStep struct {
 func (s CopyStep) Describe() string { return fmt.Sprintf("copy %s -> <target>/%s", s.RelPath, s.RelPath) }
 
 func (s CopyStep) Execute(ctx ExecContext) error {
+	if !filepath.IsLocal(s.RelPath) {
+		return fmt.Errorf("copy path escapes directory: %s", s.RelPath)
+	}
+
 	src := filepath.Join(ctx.SourceDir, s.RelPath)
 	dst := filepath.Join(ctx.TargetDir, s.RelPath)
 	if err := os.MkdirAll(filepath.Dir(dst), 0o755); err != nil {
